@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.humintec.poc.dao.MemberMapper">
+	
+	<!-- 회원가입 되어있는지 체크 -->
+	<select id="loginUser" parameterType="MemberDTO" resultType="MemberDTO">
+		SELECT 
+		ID
+	 	,USERNAME
+	 	,PASSWORD
+	 	,USERID
+	 	,BIRTHDAY
+	 	,PHONE
+	 	,CHECKBOX
+	 FROM
+	 	tb_user
+	 WHERE
+	 	USERID=#{userid} AND
+	 	PASSWORD=#{password}
+
+	</select>
+	
+	<!-- 아이디 찾기 -->
+	<select id="idlosschk" parameterType="MemberDTO" resultType="MemberDTO">
+	SELECT 
+		USERID
+	 FROM
+	 	tb_user
+	 WHERE
+	 	USERNAME=#{username}
+
+	</select>
+	
+	<!-- 비밀번호 찾기 -->
+	<select id="pswdlosschk" parameterType="MemberDTO" resultType="MemberDTO">
+	SELECT 
+		PASSWORD
+	 FROM
+	 	tb_user
+	 WHERE
+	 	USERID=#{userid}
+
+	</select>
+	
+	<!-- 회원가입 -->
+	<insert id="insertUser" parameterType="MemberDTO">
+	
+	INSERT INTO tb_user
+	(
+	 	USERNAME
+	 	,PASSWORD
+	 	,USERID
+	 	,BIRTHDAY
+	 	,PHONE
+	 	,CHECKBOX
+	 	,GNUM
+	)
+	VALUES
+	(
+	
+		#{username}
+		,#{password}
+		,#{userid}
+		,#{birthday}
+		,#{phone}
+		,#{checkbox}
+		,#{gnum}
+
+	)
+	</insert>
+	<update id="memberUpdate">
+        UPDATE tb_user
+            SET
+            USERNAME = #{username},
+            PASSWORD = #{password},
+            PHONE = #{phone}
+        WHERE USERID = #{userid}
+    </update>
+	<!-- 아이디 중복확인 -->
+	<select id="idChk" resultType="int">
+		SELECT COUNT(*) FROM tb_user
+		WHERE USERID = #{userid} and #{userid} is not null;
+	</select>
+	
+	<!-- 소속 그룹확인 -->
+	<select id="gnumchk" parameterType="GroupDTO" resultType="GroupDTO">
+		SELECT GNAME FROM TB_GROUP
+		WHERE GNUM = #{gnum} and #{gnum} is not null;
+	</select>
+	
+</mapper> 

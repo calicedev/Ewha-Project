@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="boardMapper">
+	<!-- 글쓰기 -->
+   <insert id="insert" parameterType="com.humintec.poc.dto.BoardDTO" useGeneratedKeys="true" keyProperty="bno">
+  
+	   INSERT INTO TB_BOARD(    TITLE 
+	   					      , CONTENT 
+	   					      , BWRITER
+	   					      , BWRITERID
+	   					      , THEME
+	   					
+	   					      )
+	                 VALUES(    #{title}
+	                 		  , #{content}
+	                 		  , #{bwriter}
+	                 		 , #{bwriterid}
+	                 		  , #{theme}
+	                 		)
+   
+   </insert>
+   
+   <!-- 글목록 list.html -->
+   <select id="list" resultType="com.humintec.poc.dto.BoardDTO">
+		SELECT   BNO
+			   , TITLE
+			   , BWRITER
+			   , BWRITERID
+			   , CONTENT
+			   , THEME
+			   , CREATED_DATE
+			   , MODIFIED_DATE
+		  FROM TB_BOARD
+		  ORDER BY BNO ASC
+	</select>
+	
+	<!-- 내가 쓴글 목록 -->
+	 <select id="list2" resultType="com.humintec.poc.dto.ReplyDTO">
+		SELECT *
+		FROM   tb_board tbb
+		LEFT OUTER JOIN tb_reply tbr
+                    ON( tbb.bno = tbr.bno )
+		WHERE  tbr.bwriterid = #{bwriterid}
+	</select>
+	
+	<!-- 주제에 맞는 글 목록 -->
+	<select id="theme" resultType="com.humintec.poc.dto.BoardDTO">
+		SELECT	BNO
+			  , TITLE
+			  , CONTENT
+			  , BWRITER
+			  , BWRITERID
+			  , THEME
+		 FROM TB_BOARD
+		 WHERE THEME= #{theme}
+	</select>
+	
+	<!-- 글읽기 readview -->
+	<select id="read" parameterType="int" resultType="com.humintec.poc.dto.BoardDTO">
+		SELECT	BNO
+			  , TITLE
+			  , CONTENT
+			  , BWRITER
+			  , BWRITERID
+			  , THEME
+			  , MODIFIED_DATE
+			  , LIKEHIT
+		 FROM TB_BOARD
+		 WHERE BNO = #{bno}
+	</select>
+	
+	<!-- 글 수정 -->
+	<update id="update" parameterType="com.humintec.poc.dto.BoardDTO">
+		UPDATE TB_BOARD
+		   SET TITLE    =   #{title},
+		   	   CONTENT  =   #{content},
+		   	   THEME    =   #{theme},
+		   	   MODIFIED_DATE = now()
+		 WHERE BNO = #{bno} 
+	</update>
+	
+	<!-- 글 삭제 -->
+	<delete id="delete" parameterType="int">
+		DELETE 
+		  FROM TB_BOARD
+		 WHERE BNO = #{bno}
+	</delete>
+	<!-- 게시글 추천수 -->
+	<update id="updateLike" parameterType="int">
+		update TB_BOARD set 
+		LIKEHIT = LIKEHIT+1
+		where BNO = #{bno}
+	</update>
+	
+	<!-- 게시글 추천수 취소 -->
+	<update id="updateLikeCancel" parameterType="int">
+		update TB_BOARD set 
+		LIKEHIT = LIKEHIT - 1
+		where BNO = #{bno}
+	</update>
+	
+	<!-- 게시글 추천 시 Like 테이블에 insert -->
+	<insert id="insertLike">
+		insert into TB_LIKE(LIKENO , BNO , LIKEUSERID) 
+		values((SELECT IFNULL(MAX(LIKENO), 0) + 1 FROM TB_LIKE ALIAS_FOR_SUBQUERY) ,#{bno} ,#{likeuserid})
+	</insert>
+	
+	<!-- 게시글 추천취소 시 delete -->
+	<delete id="deleteLike">
+		delete from TB_LIKE where BNO = #{bno} and LIKEUSERID = #{likeuserid}
+	</delete>
+	
+	<!-- 게시글 추천 시 Check를 1로 만들어서 중복방지-->
+	<update id="updateLikeCheck">
+		update TB_LIKE set LIKECHECK = 1
+		where BNO = #{bno} and LIKEUSERID = #{likeuserid}
+	</update>
+	
+	<!-- 게시글 추천취소 시 다시 0  -->
+	<update id="updateLikeCheckCancel">
+		update TB_LIKE set LIKECHECK = 0
+		where BNO = #{bno} and LIKEUSERID = #{likeuserid}
+	</update>
+	
+	<!-- 게시글 추천 중복방지 select문 -->
+	<select id="likeCheck" resultType="int">
+		select count(*) from TB_LIKE where BNO = #{bno} and LIKEUSERID = #{likeuserid} 
+	</select>
+	<!-- 스크랩 기능 -->
+	<insert id="scrap">
+		insert into TB_SCRAP (SCRAPNO,SCRAPUSERID , BNO) 
+		values ((SELECT IFNULL(MAX(SCRAPNO), 0) + 1 FROM TB_SCRAP ALIAS_FOR_SUBQUERY),#{scrapuserid},#{bno})
+	</insert>
+	
+	<!-- 스크랩 취소 -->
+	<delete id="scrapCancel">
+		delete from TB_SCRAP where BNO = #{bno} AND SCRAPUSERID = #{scrapuserid}
+	</delete>
+	
+	<!-- 게시글의 스크랩 수 -->
+	<select id="scrapCount" resultType="int">
+		select count(*) from TB_SCRAP where BNO = #{bno}
+	</select>
+	
+	<!-- 중복방지 -->
+	<select id="scrapCheck" resultType="int">
+		select count(*) from TB_SCRAP where BNO = #{bno} and SCRAPUSERID = #{scrapuserid}
+	</select>
+
+	<select id="mypagescrap" resultType="com.humintec.poc.dto.BoardDTO">
+		SELECT *
+		FROM   tb_board tbb
+		RIGHT OUTER JOIN tb_scrap tbs
+                    ON( tbb.bno = tbs.bno )
+		WHERE  tbs.scrapuserid = #{bwriterid}
+	</select>
+	
+	<insert id="insertFile" parameterType="hashMap">
+		INSERT INTO TB_FILE(
+			
+			BNO,
+			ORGFILENAME,
+			STOFILENAME,
+			FILESIZE
+		)VALUES(
+			
+			#{BNO},
+			#{ORGFILENAME},
+			#{STOFILENAME},
+			#{FILESIZE}
+		)
+    </insert>
+    <select id="selectFileList" parameterType="int" resultType="hashMap">
+		SELECT FNO,
+			   ORGFILENAME,
+			   STOFILENAME,
+			   ROUND(FILESIZE/1024,1) AS FILESIZE
+		  FROM TB_FILE
+		 WHERE BNO = #{BNO}
+		   AND DEL = 'N'
+		 ORDER BY FNO ASC
+	</select>
+	<select id="selectFileInfo" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			STOFILENAME,
+			ORGFILENAME
+		FROM TB_FILE
+		WHERE FNO = #{FNO}
+</select>
+<update id="updateFile" parameterType="hashMap">
+    	UPDATE TB_FILE SET
+    	DEL = 'Y'
+    	WHERE FNO = #{FNO}
+    </update>
+
+</mapper> 

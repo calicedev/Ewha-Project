@@ -1,0 +1,191 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+ <style type="text/css">
+        
+       
+        /*TAB CSS*/
+
+        ul.tabs {
+            margin: 0;
+            padding: 0;
+            float: left;
+            list-style: none;
+            height: 32px; /*--Set height of tabs--*/
+            border-bottom: 1px solid #999;
+            border-left: 1px solid #999;
+            width: 100%;
+        }
+        ul.tabs li {
+            float: left;
+            margin: 0;
+            padding: 0;
+            height: 31px; /*--Subtract 1px from the height of the unordered list--*/
+            line-height: 31px; /*--Vertically aligns the text within the tab--*/
+            border: 1px solid #999;
+            border-left: none;
+            margin-bottom: -1px; /*--Pull the list item down 1px--*/
+            overflow: hidden;
+            position: relative;
+            background: #e0e0e0;
+        }
+        ul.tabs li a {
+            text-decoration: none;
+            color: #000;
+            display: block;
+            font-size: 1.2em;
+            padding: 0 20px;
+            /*--Gives the bevel look with a 1px white border inside the list item--*/
+            border: 1px solid #fff; 
+            outline: none;
+        }
+        ul.tabs li a:hover {
+            background: #ccc;
+        }
+        html ul.tabs li.active, html ul.tabs li.active a:hover  {
+             /*--Makes sure that the active tab does not listen to the hover properties--*/
+            background: #fff;
+            /*--Makes the active tab look like it's connected with its content--*/
+            border-bottom: 1px solid #fff; 
+        }
+
+        /*Tab Conent CSS*/
+        .tab_container {
+            border: 1px solid #999;
+            border-top: none;
+            overflow: hidden;
+            clear: both;
+            float: left; 
+            width: 100%;
+            background: #fff;
+        }
+        .tab_content {
+            padding: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+    
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+<h2 class="pb-2 border-bottom">마이페이지</h2><br/>
+<button id="memberUpdateBtn" type="button">회원정보수정</button>
+<div id="wrapper">    
+    <!--탭 메뉴 영역 -->
+    <ul class="tabs">
+        <li><a href="#tab1">내가 쓴글</a></li>
+        <li><a href="#tab2">내가 댓글 쓴 글</a></li>
+        <li><a href="#tab3">내 스크랩</a></li>
+    </ul>
+
+    <!--탭 콘텐츠 영역 -->
+    <div class="tab_container">
+
+        <div id="tab1" class="tab_content">
+            <!--Content-->
+            <h1>tab1영역</h1>
+            내용 내용 내용 내용 내용 내용 <br/>
+
+        </div>
+        <div id="tab2" class="tab_content">
+         <table id="example" class="display">
+		    <thead>
+		    <tr>
+		        <th>No</th>
+		        <th>제목</th>
+		    </tr>
+		    </thead>
+		    <tbody>
+		     <c:forEach items="${list3}"  var = "list">
+			    <tr >
+			        <td width="100"><c:out value="${list.bno}" /></td>
+			        <td><a href="/board/readView?bno=${list.bno}"><c:out value="${list.title}"/></a></td>
+			    </tr>
+		    </c:forEach>
+		   
+		</table>
+        </div>
+ 		<div id="tab3" class="tab_content">
+          <table id="example2" class="display">
+		    <thead>
+		    <tr>
+		        <th>No</th>
+		        <th>제목</th>
+		    </tr>
+		    </thead>
+		    <tbody>
+		     <c:forEach items="${list2}"  var = "list">
+			    <tr >
+			        <td width="100"><c:out value="${list.bno}" /></td>
+			        <td><a href="/board/readView?bno=${list.bno}"><c:out value="${list.title}"/></a></td>
+			    </tr>
+		    </c:forEach>
+		   
+		</table>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+</main>
+ 
+     <script type="text/javascript">
+      $().ready(function(){
+    	  $('#example').DataTable(
+          		{
+          			  order: [[0, 'desc']],
+          			  ordering: true,
+          			  serverSide: false,
+          			  searching: false,
+	      			  lengthChange: false,
+	      			  info: false,
+          		});
+    	  $('#example2').DataTable(
+            		{
+            			  order: [[0, 'desc']],
+            			  ordering: true,
+            			  serverSide: false,
+            			  searching: false,
+            			  lengthChange: false,
+            			  info: false,
+            		});
+    	  
+    	  $("#show").click(function(){
+    		    $("#p").show();
+    		  });
+    	  $("#show2").click(function(){
+  		    $("#p2").show();
+  		  });
+    	  $("#hide").click(function(){
+    		    $("#p").hide();
+    		  });
+    	  
+    	  $("#memberUpdateBtn").on("click", function(){
+  			location.href="/board/memberUpdateView";
+  		})
+      })
+   
+   </script>
+  <script type="text/javascript">
+        $(document).ready(function() {
+
+            //When page loads...
+            $(".tab_content").hide(); //Hide all content
+            $("ul.tabs li:first").addClass("active").show(); //Activate first tab
+            $(".tab_content:first").show(); //Show first tab content
+
+            //On Click Event
+            $("ul.tabs li").click(function() {
+
+                $("ul.tabs li").removeClass("active"); //Remove any "active" class
+                $(this).addClass("active"); //Add "active" class to selected tab
+                $(".tab_content").hide(); //Hide all tab content
+
+                var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
+                $(activeTab).fadeIn(); //Fade in the active ID content
+                return false;
+            });
+
+        });
+    </script>

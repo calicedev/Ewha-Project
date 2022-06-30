@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="boardMapper">
+	<!-- 글쓰기 -->
+   <insert id="insert">
+	   INSERT INTO TB_BOARD(    TITLE 
+	   					      , CONTENT 
+	   					      , WRITER
+	   					      , THEME
+	   					      )
+	                 VALUES(    #{title}
+	                 		  , #{content}
+	                 		  , #{writer}
+	                 		  , #{theme}
+	                 		)
+   
+   </insert>
+   
+   <!-- 글목록 list.html -->
+   <select id="list" resultType="com.humintec.poc.dto.BoardDTO">
+		SELECT   BNO
+			   , TITLE
+			   , WRITER
+			   , CONTENT
+			   , THEME
+			   , CREATED_DATE
+			   , MODIFIED_DATE
+		  FROM TB_BOARD
+		  ORDER BY BNO ASC
+	</select>
+	
+	<!-- 내가 쓴글 목록 -->
+	 <select id="list2" resultType="com.humintec.poc.dto.ReplyDTO">
+		SELECT *
+		FROM   tb_board tbb
+		LEFT OUTER JOIN tb_reply tbr
+                    ON( tbb.bno = tbr.bno )
+		WHERE  tbr.writer = #{writer}
+	</select>
+	
+	<!-- 주제에 맞는 글 목록 -->
+	<select id="theme" resultType="com.humintec.poc.dto.BoardDTO">
+		SELECT	BNO
+			  , TITLE
+			  , CONTENT
+			  , WRITER
+			  , THEME
+		 FROM TB_BOARD
+		 WHERE THEME= #{theme}
+	</select>
+	
+	<!-- 글읽기 readview -->
+	<select id="read" parameterType="int" resultType="com.humintec.poc.dto.BoardDTO">
+		SELECT	BNO
+			  , TITLE
+			  , CONTENT
+			  , WRITER
+			  , THEME
+			  , MODIFIED_DATE
+		 FROM TB_BOARD
+		 WHERE BNO = #{bno}
+	</select>
+	
+	<!-- 글 수정 -->
+	<update id="update" parameterType="com.humintec.poc.dto.BoardDTO">
+		UPDATE TB_BOARD
+		   SET TITLE    =   #{title},
+		   	   CONTENT  =   #{content},
+		   	   THEME    =   #{theme},
+		   	   MODIFIED_DATE = now()
+		 WHERE BNO = #{bno} 
+	</update>
+	
+	<!-- 글 삭제 -->
+	<delete id="delete" parameterType="int">
+		DELETE 
+		  FROM TB_BOARD
+		 WHERE BNO = #{bno}
+	</delete>
+	
+
+</mapper> 
